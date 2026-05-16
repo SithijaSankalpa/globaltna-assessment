@@ -8,14 +8,12 @@ const jobRequestSchema = new mongoose.Schema(
       trim: true,
       maxlength: [100, "Title cannot exceed 100 characters"],
     },
-
     description: {
       type: String,
       required: [true, "Description is required"],
       trim: true,
       maxlength: [1000, "Description cannot exceed 1000 characters"],
     },
-
     category: {
       type: String,
       enum: {
@@ -24,19 +22,16 @@ const jobRequestSchema = new mongoose.Schema(
       },
       default: "Other",
     },
-
     location: {
       type: String,
       trim: true,
       default: "",
     },
-
     contactName: {
       type: String,
       trim: true,
       default: "",
     },
-
     contactEmail: {
       type: String,
       trim: true,
@@ -46,7 +41,6 @@ const jobRequestSchema = new mongoose.Schema(
         "Please provide a valid email address",
       ],
     },
-
     status: {
       type: String,
       enum: {
@@ -55,13 +49,23 @@ const jobRequestSchema = new mongoose.Schema(
       },
       default: "Open",
     },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    // tracks if a tradesperson has acted on this job
+    statusUpdatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
   },
   {
-    timestamps: true, // auto adds createdAt and updatedAt
+    timestamps: true,
   },
 );
 
-// Index for keyword search
 jobRequestSchema.index({ title: "text", description: "text" });
 
 const JobRequest = mongoose.model("JobRequest", jobRequestSchema);
