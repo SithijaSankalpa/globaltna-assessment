@@ -1,5 +1,6 @@
 "use client";
 
+import toast from "react-hot-toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginUser } from "../../../lib/api";
@@ -29,8 +30,12 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
+      // show only the first/latest error as toast
+      toast.dismiss();
+      toast.error(Object.values(validationErrors)[0]);
       return;
     }
 
@@ -40,9 +45,12 @@ export default function LoginPage() {
     try {
       const res = await loginUser(form);
       login(res.user, res.token);
+      toast.success(`Welcome back, ${res.user.name}!`);
       router.push("/");
     } catch (err) {
       setApiError(err.message);
+      toast.dismiss();
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }

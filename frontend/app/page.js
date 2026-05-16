@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { getAllJobs } from "../lib/api";
 import JobCard from "../components/JobCard";
+import { Briefcase, Search } from "lucide-react";
 
 const CATEGORIES = [
   "All",
@@ -140,8 +141,12 @@ export default function HomePage() {
                 padding: "0.5rem 1rem",
                 cursor: "pointer",
                 fontWeight: "600",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.4rem",
               }}
             >
+              <Search size={15} />
               Search
             </button>
           </form>
@@ -178,10 +183,14 @@ export default function HomePage() {
           <p
             style={{
               color: "var(--text-muted)",
-              marginTop: "0.75rem",
+              marginBottom: "1rem",
               fontSize: "0.9rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.4rem",
             }}
           >
+            <Briefcase size={14} />
             {jobs.length} job{jobs.length !== 1 ? "s" : ""} found
           </p>
         )}
@@ -224,6 +233,10 @@ export default function HomePage() {
             color: "var(--text-muted)",
           }}
         >
+          <Briefcase
+            size={48}
+            style={{ margin: "0 auto 1rem", opacity: 0.3, display: "block" }}
+          />
           <p style={{ fontSize: "1.2rem", marginBottom: "0.5rem" }}>
             No jobs found
           </p>

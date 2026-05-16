@@ -1,6 +1,17 @@
 "use client";
+import {
+  FileText,
+  AlignLeft,
+  Tag,
+  MapPin,
+  User,
+  Mail,
+  Send,
+  ArrowLeft,
+} from "lucide-react";
+import toast from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createJob } from "../../../lib/api";
 
@@ -82,8 +93,11 @@ export default function NewJobPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
+      toast.dismiss();
+      toast.error(Object.values(validationErrors)[0]);
       return;
     }
 
@@ -92,16 +106,12 @@ export default function NewJobPage() {
 
     try {
       await createJob(form);
+      toast.success("Job request posted successfully!");
       router.push("/");
     } catch (err) {
-      if (err.errors && Array.isArray(err.errors)) {
-        const fieldErrors = err.errors.reduce((acc, curr) => {
-          acc[curr.field] = curr.message;
-          return acc;
-        }, {});
-        setErrors((prev) => ({ ...prev, ...fieldErrors }));
-      }
       setApiError(err.message);
+      toast.dismiss();
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -143,9 +153,12 @@ export default function NewJobPage() {
             color: "var(--accent)",
             textDecoration: "none",
             fontSize: "0.9rem",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.3rem",
           }}
         >
-          ← Back to listings
+          <ArrowLeft size={15} /> Back to listings
         </a>
         <h1
           style={{
@@ -193,7 +206,13 @@ export default function NewJobPage() {
       >
         {/* Title */}
         <div style={fieldStyle}>
-          <label style={labelStyle}>Title *</label>
+          <label style={labelStyle}>
+            <FileText
+              size={13}
+              style={{ display: "inline", marginRight: "0.3rem" }}
+            />
+            Title *
+          </label>
           <input
             name="title"
             value={form.title}
@@ -210,7 +229,13 @@ export default function NewJobPage() {
 
         {/* Description */}
         <div style={fieldStyle}>
-          <label style={labelStyle}>Description *</label>
+          <label style={labelStyle}>
+            <AlignLeft
+              size={13}
+              style={{ display: "inline", marginRight: "0.3rem" }}
+            />
+            Description *
+          </label>
           <textarea
             name="description"
             value={form.description}
@@ -239,7 +264,13 @@ export default function NewJobPage() {
           }}
         >
           <div style={fieldStyle}>
-            <label style={labelStyle}>Category</label>
+            <label style={labelStyle}>
+              <Tag
+                size={13}
+                style={{ display: "inline", marginRight: "0.3rem" }}
+              />
+              Category
+            </label>
             <select
               name="category"
               value={form.category}
@@ -259,7 +290,13 @@ export default function NewJobPage() {
             )}
           </div>
           <div style={fieldStyle}>
-            <label style={labelStyle}>Location</label>
+            <label style={labelStyle}>
+              <MapPin
+                size={13}
+                style={{ display: "inline", marginRight: "0.3rem" }}
+              />
+              Location
+            </label>
             <input
               name="location"
               value={form.location}
@@ -284,7 +321,13 @@ export default function NewJobPage() {
           }}
         >
           <div style={fieldStyle}>
-            <label style={labelStyle}>Contact Name</label>
+            <label style={labelStyle}>
+              <User
+                size={13}
+                style={{ display: "inline", marginRight: "0.3rem" }}
+              />
+              Contact Name
+            </label>
             <input
               name="contactName"
               value={form.contactName}
@@ -299,7 +342,13 @@ export default function NewJobPage() {
             )}
           </div>
           <div style={fieldStyle}>
-            <label style={labelStyle}>Contact Email</label>
+            <label style={labelStyle}>
+              <Mail
+                size={13}
+                style={{ display: "inline", marginRight: "0.3rem" }}
+              />
+              Contact Email
+            </label>
             <input
               name="contactEmail"
               value={form.contactEmail}
@@ -330,9 +379,13 @@ export default function NewJobPage() {
             fontWeight: "600",
             cursor: loading ? "not-allowed" : "pointer",
             marginTop: "0.5rem",
-            transition: "background 0.2s",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.5rem",
           }}
         >
+          <Send size={16} />
           {loading ? "Posting..." : "Post Service Request"}
         </button>
       </form>

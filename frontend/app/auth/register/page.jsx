@@ -1,5 +1,6 @@
 "use client";
 
+import toast from "react-hot-toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { registerUser } from "../../../lib/api";
@@ -41,8 +42,11 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
+      toast.dismiss();
+      toast.error(Object.values(validationErrors)[0]);
       return;
     }
 
@@ -56,9 +60,12 @@ export default function RegisterPage() {
         password: form.password,
       });
       login(res.user, res.token);
+      toast.success(`Account created! Welcome, ${res.user.name}!`);
       router.push("/");
     } catch (err) {
       setApiError(err.message);
+      toast.dismiss();
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }

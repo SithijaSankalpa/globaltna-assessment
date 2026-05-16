@@ -1,3 +1,4 @@
+import { MapPin, Tag, Calendar, ArrowRight } from "lucide-react";
 import StatusBadge from "./StatusBadge";
 
 export default function JobCard({ job }) {
@@ -14,6 +15,7 @@ export default function JobCard({ job }) {
           display: "flex",
           flexDirection: "column",
           gap: "0.75rem",
+          height: "100%",
         }}
         onMouseOver={(e) => {
           e.currentTarget.style.transform = "translateY(-3px)";
@@ -58,17 +60,19 @@ export default function JobCard({ job }) {
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
             overflow: "hidden",
+            flex: 1,
           }}
         >
           {job.description}
         </p>
 
-        {/* Bottom Row */}
+        {/* Meta Row */}
         <div
           style={{
             display: "flex",
             gap: "1rem",
             flexWrap: "wrap",
+            alignItems: "center",
             marginTop: "0.25rem",
           }}
         >
@@ -81,25 +85,59 @@ export default function JobCard({ job }) {
                 borderRadius: "4px",
                 fontSize: "0.8rem",
                 fontWeight: "500",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.3rem",
               }}
             >
+              <Tag size={11} />
               {job.category}
             </span>
           )}
+
           {job.location && (
-            <span style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>
-              📍 {job.location}
+            <span
+              style={{
+                color: "var(--text-muted)",
+                fontSize: "0.82rem",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.3rem",
+              }}
+            >
+              <MapPin size={12} />
+              {job.location}
             </span>
           )}
+
           <span
             style={{
               color: "var(--text-muted)",
               fontSize: "0.82rem",
               marginLeft: "auto",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.3rem",
             }}
           >
+            <Calendar size={12} />
             {new Date(job.createdAt).toLocaleDateString()}
           </span>
+        </div>
+
+        {/* View Details */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.3rem",
+            color: "var(--accent)",
+            fontSize: "0.82rem",
+            fontWeight: "600",
+            marginTop: "0.25rem",
+          }}
+        >
+          View details <ArrowRight size={13} />
         </div>
       </div>
     </a>

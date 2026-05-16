@@ -1,5 +1,8 @@
 "use client";
 
+import { PlusCircle, LogOut, User } from "lucide-react";
+import toast from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -10,6 +13,7 @@ function Navbar() {
 
   const handleLogout = () => {
     logout();
+    toast.success("Logged out successfully");
     router.push("/");
   };
 
@@ -45,8 +49,17 @@ function Navbar() {
       <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
         {user ? (
           <>
-            <span style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
-              👤 {user.name}
+            <span
+              style={{
+                color: "var(--text-muted)",
+                fontSize: "0.9rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.35rem",
+              }}
+            >
+              <User size={15} />
+              {user.name}
             </span>
             <a
               href="/jobs/new"
@@ -58,9 +71,13 @@ function Navbar() {
                 textDecoration: "none",
                 fontSize: "0.9rem",
                 fontWeight: "600",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.4rem",
               }}
             >
-              + Post a Job
+              <PlusCircle size={15} />
+              Post a Job
             </a>
             <button
               onClick={handleLogout}
@@ -72,8 +89,12 @@ function Navbar() {
                 padding: "0.5rem 1rem",
                 cursor: "pointer",
                 fontSize: "0.9rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.35rem",
               }}
             >
+              <LogOut size={14} />
               Logout
             </button>
           </>
@@ -123,6 +144,31 @@ export default function RootLayout({ children }) {
       <body>
         <AuthProvider>
           <Navbar />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+              style: {
+                background: "#16213e",
+                color: "#eaeaea",
+                border: "1px solid rgba(233, 69, 96, 0.3)",
+                borderRadius: "8px",
+                fontSize: "0.9rem",
+              },
+              success: {
+                iconTheme: {
+                  primary: "#4caf50",
+                  secondary: "#16213e",
+                },
+              },
+              error: {
+                iconTheme: {
+                  primary: "#f44336",
+                  secondary: "#16213e",
+                },
+              },
+            }}
+          />
           <main
             style={{
               maxWidth: "1100px",
