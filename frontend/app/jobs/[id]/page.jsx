@@ -1,5 +1,17 @@
 "use client";
 
+import {
+  MapPin,
+  Tag,
+  Clock,
+  Mail,
+  User,
+  Trash2,
+  ArrowLeft,
+  RefreshCw,
+} from "lucide-react";
+import toast from "react-hot-toast";
+import { useAuth } from "../../../components/../context/AuthContext";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { getJobById, updateJobStatus, deleteJob } from "../../../lib/api";
@@ -16,6 +28,7 @@ export default function JobDetailPage() {
   const [error, setError] = useState("");
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!jobId) return;
@@ -37,8 +50,10 @@ export default function JobDetailPage() {
     try {
       const res = await updateJobStatus(job._id, e.target.value);
       setJob(res.data);
+      toast.success(`Status updated to "${res.data.status}"`);
     } catch (err) {
-      alert(err.message);
+      toast.dismiss();
+      toast.error(err.message);
     } finally {
       setUpdating(false);
     }
@@ -49,9 +64,11 @@ export default function JobDetailPage() {
     setDeleting(true);
     try {
       await deleteJob(job._id);
+      toast.success("Job request deleted");
       router.push("/");
     } catch (err) {
-      alert(err.message);
+      toast.dismiss();
+      toast.error(err.message);
       setDeleting(false);
     }
   };
@@ -85,9 +102,12 @@ export default function JobDetailPage() {
           color: "var(--accent)",
           textDecoration: "none",
           fontSize: "0.9rem",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "0.3rem",
         }}
       >
-        ← Back to listings
+        <ArrowLeft size={15} /> Back to listings
       </a>
 
       {/* Main Card */}
@@ -127,9 +147,9 @@ export default function JobDetailPage() {
         <div
           style={{
             display: "flex",
-            gap: "1rem",
             flexWrap: "wrap",
-            marginBottom: "1.5rem",
+            gap: "0.75rem",
+            alignItems: "center",
           }}
         >
           {job.category && (
@@ -140,18 +160,42 @@ export default function JobDetailPage() {
                 padding: "0.25rem 0.75rem",
                 borderRadius: "4px",
                 fontSize: "0.85rem",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.35rem",
               }}
             >
+              <Tag size={12} />
               {job.category}
             </span>
           )}
+
           {job.location && (
-            <span style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>
-              📍 {job.location}
+            <span
+              style={{
+                color: "var(--text-muted)",
+                fontSize: "0.85rem",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.35rem",
+              }}
+            >
+              <MapPin size={13} />
+              {job.location}
             </span>
           )}
-          <span style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>
-            🕒 Posted{" "}
+
+          <span
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "0.85rem",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.35rem",
+            }}
+          >
+            <Clock size={13} />
+            Posted{" "}
             {new Date(job.createdAt).toLocaleDateString("en-GB", {
               day: "numeric",
               month: "long",
@@ -219,13 +263,27 @@ export default function JobDetailPage() {
                 style={{
                   color: "var(--text-primary)",
                   marginBottom: "0.25rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.4rem",
                 }}
               >
-                👤 {job.contactName}
+                <User size={14} style={{ color: "var(--text-muted)" }} />
+                {job.contactName}
               </p>
             )}
             {job.contactEmail && (
-              <p style={{ color: "var(--accent)" }}>✉️ {job.contactEmail}</p>
+              <p
+                style={{
+                  color: "var(--accent)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.4rem",
+                }}
+              >
+                <Mail size={14} />
+                {job.contactEmail}
+              </p>
             )}
           </div>
         )}
@@ -247,75 +305,99 @@ export default function JobDetailPage() {
             flexWrap: "wrap",
           }}
         >
-          <div style={{ flex: 1 }}>
-            <label
-              style={{
-                color: "var(--text-muted)",
-                fontSize: "0.85rem",
-                display: "block",
-                marginBottom: "0.4rem",
-              }}
-            >
-              Update Status
-            </label>
-            <select
-              value={job.status}
-              onChange={handleStatusChange}
-              disabled={updating}
-              style={{
-                background: "var(--primary)",
-                color: "var(--text-primary)",
-                border: "1px solid var(--border)",
-                borderRadius: "6px",
-                padding: "0.6rem 1rem",
-                fontSize: "0.9rem",
-                cursor: "pointer",
-                minWidth: "180px",
-              }}
-            >
-              {STATUSES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            {updating && (
-              <span
-                style={{
-                  color: "var(--text-muted)",
-                  fontSize: "0.8rem",
-                  marginLeft: "0.5rem",
-                }}
-              >
-                Updating...
-              </span>
-            )}
-          </div>
+          {user && (
+            <>
+              <div style={{ flex: 1 }}>
+                <label
+                  style={{
+                    color: "var(--text-muted)",
+                    fontSize: "0.85rem",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.35rem",
+                    marginBottom: "0.4rem",
+                  }}
+                >
+                  <RefreshCw size={13} />
+                  Update Status
+                </label>
+                <select
+                  value={job.status}
+                  onChange={handleStatusChange}
+                  disabled={updating}
+                  style={{
+                    background: "var(--primary)",
+                    color: "var(--text-primary)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "6px",
+                    padding: "0.6rem 1rem",
+                    fontSize: "0.9rem",
+                    cursor: "pointer",
+                    minWidth: "180px",
+                  }}
+                >
+                  {STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+                {updating && (
+                  <span
+                    style={{
+                      color: "var(--text-muted)",
+                      fontSize: "0.8rem",
+                      marginLeft: "0.5rem",
+                    }}
+                  >
+                    Updating...
+                  </span>
+                )}
+              </div>
 
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            style={{
-              background: "transparent",
-              color: "#f44336",
-              border: "1px solid #f44336",
-              borderRadius: "6px",
-              padding: "0.6rem 1.25rem",
-              cursor: deleting ? "not-allowed" : "pointer",
-              fontSize: "0.9rem",
-              fontWeight: "600",
-              transition: "background 0.2s",
-              alignSelf: "flex-end",
-            }}
-            onMouseOver={(e) =>
-              (e.currentTarget.style.background = "rgba(244,67,54,0.1)")
-            }
-            onMouseOut={(e) =>
-              (e.currentTarget.style.background = "transparent")
-            }
-          >
-            {deleting ? "Deleting..." : "🗑 Delete Job"}
-          </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                style={{
+                  background: "transparent",
+                  color: "#f44336",
+                  border: "1px solid #f44336",
+                  borderRadius: "6px",
+                  padding: "0.6rem 1.25rem",
+                  cursor: deleting ? "not-allowed" : "pointer",
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  transition: "background 0.2s",
+                  alignSelf: "flex-end",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.4rem",
+                }}
+                onMouseOver={(e) =>
+                  (e.currentTarget.style.background = "rgba(244,67,54,0.1)")
+                }
+                onMouseOut={(e) =>
+                  (e.currentTarget.style.background = "transparent")
+                }
+              >
+                <Trash2 size={15} />
+                {deleting ? "Deleting..." : "Delete Job"}
+              </button>
+            </>
+          )}
+
+          {/* Guest message */}
+          {!user && (
+            <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
+              <a
+                href="/auth/login"
+                style={{ color: "var(--accent)", textDecoration: "none" }}
+              >
+                Login
+              </a>{" "}
+              to update status or delete this job
+            </p>
+          )}
         </div>
       </div>
     </div>
