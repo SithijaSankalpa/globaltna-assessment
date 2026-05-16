@@ -8,9 +8,13 @@ exports.getAllJobs = async (req, res, next) => {
     if (category) filter.category = category;
     if (status) filter.status = status;
 
-    // keyword search across title and description
-    if (search) {
-      filter.$text = { $search: search };
+    // Partial, case-insensitive search across title and description
+    if (search && search.trim()) {
+      const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      filter.$or = [
+        { title: { $regex: escaped, $options: "i" } },
+        { description: { $regex: escaped, $options: "i" } },
+      ];
     }
 
     const jobs = await JobRequest.find(filter).sort({ createdAt: -1 });

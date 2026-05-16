@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 
 const jobRoutes = require("./routes/jobRoutes");
 const errorHandler = require("./middleware/errorHandler");
+const authRoutes = require("./routes/authRoutes");
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/jobs", jobRoutes);
+app.use("/api/auth", authRoutes);
 
 app.use((req, res, next) => {
   res.status(404).json({ success: false, message: "Route not found" });
