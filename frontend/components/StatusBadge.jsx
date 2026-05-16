@@ -27,6 +27,7 @@ export default function StatusBadge({ status }) {
         fontWeight: "600",
         letterSpacing: "0.05em",
         textTransform: "uppercase",
+        whiteSpace: "nowrap",
       }}
     >
       {status}

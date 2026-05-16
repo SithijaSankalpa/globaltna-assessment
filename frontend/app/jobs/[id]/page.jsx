@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { getJobById, updateJobStatus, deleteJob } from "../../../lib/api";
 import StatusBadge from "../../../components/StatusBadge";
 
 const STATUSES = ["Open", "In Progress", "Closed"];
 
-export default function JobDetailPage({ params }) {
+export default function JobDetailPage() {
   const router = useRouter();
+  const params = useParams();
+  const jobId = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -16,9 +18,10 @@ export default function JobDetailPage({ params }) {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
+    if (!jobId) return;
     const fetchJob = async () => {
       try {
-        const res = await getJobById(params.id);
+        const res = await getJobById(jobId);
         setJob(res.data);
       } catch (err) {
         setError(err.message);
@@ -27,7 +30,7 @@ export default function JobDetailPage({ params }) {
       }
     };
     fetchJob();
-  }, [params.id]);
+  }, [jobId]);
 
   const handleStatusChange = async (e) => {
     setUpdating(true);
