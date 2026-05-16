@@ -1,5 +1,5 @@
 "use client";
-
+import { useAuth } from "../../../context/AuthContext";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createJob } from "../../../lib/api";
@@ -11,6 +11,7 @@ export default function NewJobPage() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState("");
+  const { user, loading: authLoading } = useAuth();
 
   const [form, setForm] = useState({
     title: "",
@@ -20,6 +21,12 @@ export default function NewJobPage() {
     contactName: "",
     contactEmail: "",
   });
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/auth/login");
+    }
+  }, [user, authLoading]);
 
   const validate = () => {
     const e = {};

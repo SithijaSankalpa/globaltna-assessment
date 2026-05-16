@@ -1,5 +1,5 @@
 "use client";
-
+import { useAuth } from "../../../components/../context/AuthContext";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { getJobById, updateJobStatus, deleteJob } from "../../../lib/api";
@@ -16,6 +16,7 @@ export default function JobDetailPage() {
   const [error, setError] = useState("");
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!jobId) return;
@@ -292,30 +293,32 @@ export default function JobDetailPage() {
             )}
           </div>
 
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            style={{
-              background: "transparent",
-              color: "#f44336",
-              border: "1px solid #f44336",
-              borderRadius: "6px",
-              padding: "0.6rem 1.25rem",
-              cursor: deleting ? "not-allowed" : "pointer",
-              fontSize: "0.9rem",
-              fontWeight: "600",
-              transition: "background 0.2s",
-              alignSelf: "flex-end",
-            }}
-            onMouseOver={(e) =>
-              (e.currentTarget.style.background = "rgba(244,67,54,0.1)")
-            }
-            onMouseOut={(e) =>
-              (e.currentTarget.style.background = "transparent")
-            }
-          >
-            {deleting ? "Deleting..." : "🗑 Delete Job"}
-          </button>
+          {user && (
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              style={{
+                background: "transparent",
+                color: "#f44336",
+                border: "1px solid #f44336",
+                borderRadius: "6px",
+                padding: "0.6rem 1.25rem",
+                cursor: deleting ? "not-allowed" : "pointer",
+                fontSize: "0.9rem",
+                fontWeight: "600",
+                transition: "background 0.2s",
+                alignSelf: "flex-end",
+              }}
+              onMouseOver={(e) =>
+                (e.currentTarget.style.background = "rgba(244,67,54,0.1)")
+              }
+              onMouseOut={(e) =>
+                (e.currentTarget.style.background = "transparent")
+              }
+            >
+              {deleting ? "Deleting..." : "🗑 Delete Job"}
+            </button>
+          )}
         </div>
       </div>
     </div>

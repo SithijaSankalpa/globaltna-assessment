@@ -49,3 +49,21 @@ export const deleteJob = async (id) => {
   });
   return handleResponse(res);
 };
+
+export const registerUser = async (userData) => {
+  const res = await fetch(`${BASE_URL}/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(userData),
+  });
+  return handleResponse(res);
+};
+
+export const loginUser = async (credentials) => {
+  const res = await fetch(`${BASE_URL}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(credentials),
+  });
+  return handleResponse(res);
+};
