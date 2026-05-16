@@ -1,10 +1,11 @@
 "use client";
 
-import toast from "react-hot-toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { registerUser } from "../../../lib/api";
 import { useAuth } from "../../../context/AuthContext";
+import toast from "react-hot-toast";
+import { Home, Wrench } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
+    role: "",
   });
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState("");
@@ -31,6 +33,7 @@ export default function RegisterPage() {
       e.password = "Password must be at least 6 characters";
     if (form.password !== form.confirmPassword)
       e.confirmPassword = "Passwords do not match";
+    if (!form.role) e.role = "Please select a role";
     return e;
   };
 
@@ -42,7 +45,6 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
-
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       toast.dismiss();
@@ -58,9 +60,10 @@ export default function RegisterPage() {
         name: form.name,
         email: form.email,
         password: form.password,
+        role: form.role,
       });
       login(res.user, res.token);
-      toast.success(`Account created! Welcome, ${res.user.name}!`);
+      toast.success(`Welcome, ${res.user.name}!`);
       router.push("/");
     } catch (err) {
       setApiError(err.message);
@@ -95,7 +98,7 @@ export default function RegisterPage() {
           Create an Account
         </h1>
         <p style={{ color: "var(--text-muted)", marginTop: "0.5rem" }}>
-          Join FixMate to post service requests
+          Join GlobalTNA to get started
         </p>
       </div>
 
@@ -126,12 +129,100 @@ export default function RegisterPage() {
           gap: "1.25rem",
         }}
       >
+        {/* Role Selector */}
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+        >
+          <label style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
+            I am a *
+          </label>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "0.75rem",
+            }}
+          >
+            {[
+              {
+                value: "homeowner",
+                label: "Homeowner",
+                icon: Home,
+                desc: "I need work done",
+              },
+              {
+                value: "tradesperson",
+                label: "Tradesperson",
+                icon: Wrench,
+                desc: "I provide services",
+              },
+            ].map(({ value, label, icon: Icon, desc }) => (
+              <div
+                key={value}
+                onClick={() => {
+                  setForm((p) => ({ ...p, role: value }));
+                  setErrors((p) => ({ ...p, role: "" }));
+                }}
+                style={{
+                  border: `2px solid ${form.role === value ? "var(--accent)" : "var(--border)"}`,
+                  background:
+                    form.role === value
+                      ? "rgba(233,69,96,0.1)"
+                      : "var(--primary)",
+                  borderRadius: "8px",
+                  padding: "1rem",
+                  cursor: "pointer",
+                  textAlign: "center",
+                  transition: "all 0.2s",
+                }}
+              >
+                <Icon
+                  size={24}
+                  style={{
+                    color:
+                      form.role === value
+                        ? "var(--accent)"
+                        : "var(--text-muted)",
+                    margin: "0 auto 0.4rem",
+                  }}
+                />
+                <p
+                  style={{
+                    color:
+                      form.role === value
+                        ? "var(--accent)"
+                        : "var(--text-primary)",
+                    fontWeight: "600",
+                    fontSize: "0.9rem",
+                  }}
+                >
+                  {label}
+                </p>
+                <p
+                  style={{
+                    color: "var(--text-muted)",
+                    fontSize: "0.78rem",
+                    marginTop: "0.2rem",
+                  }}
+                >
+                  {desc}
+                </p>
+              </div>
+            ))}
+          </div>
+          {errors.role && (
+            <span style={{ color: "#f44336", fontSize: "0.8rem" }}>
+              {errors.role}
+            </span>
+          )}
+        </div>
+
         {/* Name */}
         <div
           style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
         >
           <label style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
-            Full Name
+            Full Name *
           </label>
           <input
             name="name"
@@ -152,7 +243,7 @@ export default function RegisterPage() {
           style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
         >
           <label style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
-            Email
+            Email *
           </label>
           <input
             name="email"
@@ -174,7 +265,7 @@ export default function RegisterPage() {
           style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
         >
           <label style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
-            Password
+            Password *
           </label>
           <input
             name="password"
@@ -196,7 +287,7 @@ export default function RegisterPage() {
           style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
         >
           <label style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
-            Confirm Password
+            Confirm Password *
           </label>
           <input
             name="confirmPassword"
@@ -232,7 +323,6 @@ export default function RegisterPage() {
           {loading ? "Creating account..." : "Create Account"}
         </button>
 
-        {/* Login Link */}
         <p
           style={{
             textAlign: "center",

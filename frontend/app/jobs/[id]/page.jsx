@@ -9,6 +9,7 @@ import {
   Trash2,
   ArrowLeft,
   RefreshCw,
+  Pencil,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../components/../context/AuthContext";
@@ -28,7 +29,7 @@ export default function JobDetailPage() {
   const [error, setError] = useState("");
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const { user } = useAuth();
+  const { user, token, isHomeowner, isTradesperson } = useAuth();
 
   useEffect(() => {
     if (!jobId) return;
@@ -48,7 +49,7 @@ export default function JobDetailPage() {
   const handleStatusChange = async (e) => {
     setUpdating(true);
     try {
-      const res = await updateJobStatus(job._id, e.target.value);
+      const res = await updateJobStatus(job._id, e.target.value, token);
       setJob(res.data);
       toast.success(`Status updated to "${res.data.status}"`);
     } catch (err) {
@@ -63,7 +64,7 @@ export default function JobDetailPage() {
     if (!confirm("Are you sure you want to delete this job request?")) return;
     setDeleting(true);
     try {
-      await deleteJob(job._id);
+      await deleteJob(job._id, token);
       toast.success("Job request deleted");
       router.push("/");
     } catch (err) {
@@ -297,6 +298,7 @@ export default function JobDetailPage() {
         />
 
         {/* Actions */}
+        {/* Actions */}
         <div
           style={{
             display: "flex",
@@ -305,55 +307,80 @@ export default function JobDetailPage() {
             flexWrap: "wrap",
           }}
         >
-          {user && (
-            <>
-              <div style={{ flex: 1 }}>
-                <label
+          {/* Tradesperson — change status */}
+          {isTradesperson && (
+            <div style={{ flex: 1 }}>
+              <label
+                style={{
+                  color: "var(--text-muted)",
+                  fontSize: "0.85rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.35rem",
+                  marginBottom: "0.4rem",
+                }}
+              >
+                <RefreshCw size={13} /> Update Status
+              </label>
+              <select
+                value={job.status}
+                onChange={handleStatusChange}
+                disabled={updating}
+                style={{
+                  background: "var(--primary)",
+                  color: "var(--text-primary)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "6px",
+                  padding: "0.6rem 1rem",
+                  fontSize: "0.9rem",
+                  cursor: "pointer",
+                  minWidth: "180px",
+                }}
+              >
+                {STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+              {updating && (
+                <span
                   style={{
                     color: "var(--text-muted)",
-                    fontSize: "0.85rem",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.35rem",
-                    marginBottom: "0.4rem",
+                    fontSize: "0.8rem",
+                    marginLeft: "0.5rem",
                   }}
                 >
-                  <RefreshCw size={13} />
-                  Update Status
-                </label>
-                <select
-                  value={job.status}
-                  onChange={handleStatusChange}
-                  disabled={updating}
+                  Updating...
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Homeowner — edit + delete own job */}
+          {isHomeowner && user?.id === job.createdBy?._id && (
+            <>
+              {/* Show edit only if Open and not touched by tradesperson */}
+              {job.status === "Open" && !job.statusUpdatedBy && (
+                <a
+                  href={`/jobs/${job._id}/edit`}
                   style={{
-                    background: "var(--primary)",
+                    background: "var(--surface)",
                     color: "var(--text-primary)",
                     border: "1px solid var(--border)",
                     borderRadius: "6px",
-                    padding: "0.6rem 1rem",
+                    padding: "0.6rem 1.25rem",
                     fontSize: "0.9rem",
-                    cursor: "pointer",
-                    minWidth: "180px",
+                    fontWeight: "600",
+                    textDecoration: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.4rem",
                   }}
                 >
-                  {STATUSES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-                {updating && (
-                  <span
-                    style={{
-                      color: "var(--text-muted)",
-                      fontSize: "0.8rem",
-                      marginLeft: "0.5rem",
-                    }}
-                  >
-                    Updating...
-                  </span>
-                )}
-              </div>
+                  <Pencil size={15} /> Edit Job
+                </a>
+              )}
 
               <button
                 onClick={handleDelete}
@@ -368,7 +395,6 @@ export default function JobDetailPage() {
                   fontSize: "0.9rem",
                   fontWeight: "600",
                   transition: "background 0.2s",
-                  alignSelf: "flex-end",
                   display: "flex",
                   alignItems: "center",
                   gap: "0.4rem",
@@ -386,7 +412,7 @@ export default function JobDetailPage() {
             </>
           )}
 
-          {/* Guest message */}
+          {/* Guest */}
           {!user && (
             <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
               <a
@@ -395,7 +421,7 @@ export default function JobDetailPage() {
               >
                 Login
               </a>{" "}
-              to update status or delete this job
+              to manage this job
             </p>
           )}
         </div>

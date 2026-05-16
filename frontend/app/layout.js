@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusCircle, LogOut, User } from "lucide-react";
+import { PlusCircle, LogOut, User, Home, Wrench } from "lucide-react";
 import toast from "react-hot-toast";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
@@ -8,7 +8,7 @@ import { AuthProvider, useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 
 function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, isHomeowner, isTradesperson } = useAuth();
   const router = useRouter();
 
   const handleLogout = () => {
@@ -52,33 +52,54 @@ function Navbar() {
             <span
               style={{
                 color: "var(--text-muted)",
-                fontSize: "0.9rem",
+                fontSize: "0.85rem",
                 display: "flex",
                 alignItems: "center",
                 gap: "0.35rem",
+                background: "var(--primary)",
+                padding: "0.3rem 0.75rem",
+                borderRadius: "20px",
+                border: "1px solid var(--border)",
               }}
             >
-              <User size={15} />
+              {isHomeowner ? <Home size={13} /> : <Wrench size={13} />}
               {user.name}
+              <span
+                style={{
+                  background: isHomeowner
+                    ? "rgba(233,69,96,0.15)"
+                    : "rgba(76,175,80,0.15)",
+                  color: isHomeowner ? "var(--accent)" : "#4caf50",
+                  fontSize: "0.7rem",
+                  padding: "0.1rem 0.4rem",
+                  borderRadius: "10px",
+                  textTransform: "capitalize",
+                }}
+              >
+                {user.role}
+              </span>
             </span>
-            <a
-              href="/jobs/new"
-              style={{
-                background: "var(--accent)",
-                color: "white",
-                padding: "0.5rem 1.2rem",
-                borderRadius: "6px",
-                textDecoration: "none",
-                fontSize: "0.9rem",
-                fontWeight: "600",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.4rem",
-              }}
-            >
-              <PlusCircle size={15} />
-              Post a Job
-            </a>
+
+            {isHomeowner && (
+              <a
+                href="/jobs/new"
+                style={{
+                  background: "var(--accent)",
+                  color: "white",
+                  padding: "0.5rem 1.2rem",
+                  borderRadius: "6px",
+                  textDecoration: "none",
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.4rem",
+                }}
+              >
+                <PlusCircle size={15} /> Post a Job
+              </a>
+            )}
+
             <button
               onClick={handleLogout}
               style={{
@@ -94,8 +115,7 @@ function Navbar() {
                 gap: "0.35rem",
               }}
             >
-              <LogOut size={14} />
-              Logout
+              <LogOut size={14} /> Logout
             </button>
           </>
         ) : (

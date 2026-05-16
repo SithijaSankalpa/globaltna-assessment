@@ -25,31 +25,50 @@ export const getJobById = async (id) => {
   return handleResponse(res);
 };
 
-export const createJob = async (jobData) => {
+export const createJob = async (jobData, token) => {
   const res = await fetch(`${BASE_URL}/api/jobs`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     body: JSON.stringify(jobData),
   });
   return handleResponse(res);
 };
 
-export const updateJobStatus = async (id, status) => {
+export const updateJob = async (id, jobData, token) => {
+  const res = await fetch(`${BASE_URL}/api/jobs/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(jobData),
+  });
+  return handleResponse(res);
+};
+
+export const updateJobStatus = async (id, status, token) => {
   const res = await fetch(`${BASE_URL}/api/jobs/${id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     body: JSON.stringify({ status }),
   });
   return handleResponse(res);
 };
-
-export const deleteJob = async (id) => {
+export const deleteJob = async (id, token) => {
   const res = await fetch(`${BASE_URL}/api/jobs/${id}`, {
     method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
   return handleResponse(res);
 };
-
 export const registerUser = async (userData) => {
   const res = await fetch(`${BASE_URL}/api/auth/register`, {
     method: "POST",
