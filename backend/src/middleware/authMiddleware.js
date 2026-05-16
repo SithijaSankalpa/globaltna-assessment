@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
+// Protect — must be logged in
 const protect = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -22,4 +23,17 @@ const protect = async (req, res, next) => {
   }
 };
 
-module.exports = { protect };
+// Authorize — restrict to specific roles
+const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: `Access denied. Only ${roles.join(" or ")} can perform this action`,
+      });
+    }
+    next();
+  };
+};
+
+module.exports = { protect, authorizeRoles };
