@@ -144,25 +144,47 @@ export default function JobDetailPage() {
         </div>
 
         {/* Meta */}
-        {job.category && (
-          <span
-            style={{
-              background: "var(--surface)",
-              color: "var(--accent)",
-              padding: "0.25rem 0.75rem",
-              borderRadius: "4px",
-              fontSize: "0.85rem",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.35rem",
-            }}
-          >
-            <Tag size={12} />
-            {job.category}
-          </span>
-        )}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "0.75rem",
+            alignItems: "center",
+          }}
+        >
+          {job.category && (
+            <span
+              style={{
+                background: "var(--surface)",
+                color: "var(--accent)",
+                padding: "0.25rem 0.75rem",
+                borderRadius: "4px",
+                fontSize: "0.85rem",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.35rem",
+              }}
+            >
+              <Tag size={12} />
+              {job.category}
+            </span>
+          )}
 
-        {job.location && (
+          {job.location && (
+            <span
+              style={{
+                color: "var(--text-muted)",
+                fontSize: "0.85rem",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.35rem",
+              }}
+            >
+              <MapPin size={13} />
+              {job.location}
+            </span>
+          )}
+
           <span
             style={{
               color: "var(--text-muted)",
@@ -172,28 +194,15 @@ export default function JobDetailPage() {
               gap: "0.35rem",
             }}
           >
-            <MapPin size={13} />
-            {job.location}
+            <Clock size={13} />
+            Posted{" "}
+            {new Date(job.createdAt).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
           </span>
-        )}
-
-        <span
-          style={{
-            color: "var(--text-muted)",
-            fontSize: "0.85rem",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.35rem",
-          }}
-        >
-          <Clock size={13} />
-          Posted{" "}
-          {new Date(job.createdAt).toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
-        </span>
+        </div>
 
         {/* Divider */}
         <div
@@ -296,83 +305,98 @@ export default function JobDetailPage() {
             flexWrap: "wrap",
           }}
         >
-          <div style={{ flex: 1 }}>
-            <label
-              style={{
-                color: "var(--text-muted)",
-                fontSize: "0.85rem",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.35rem",
-                marginBottom: "0.4rem",
-              }}
-            >
-              <RefreshCw size={13} />
-              Update Status
-            </label>
-            <select
-              value={job.status}
-              onChange={handleStatusChange}
-              disabled={updating}
-              style={{
-                background: "var(--primary)",
-                color: "var(--text-primary)",
-                border: "1px solid var(--border)",
-                borderRadius: "6px",
-                padding: "0.6rem 1rem",
-                fontSize: "0.9rem",
-                cursor: "pointer",
-                minWidth: "180px",
-              }}
-            >
-              {STATUSES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            {updating && (
-              <span
-                style={{
-                  color: "var(--text-muted)",
-                  fontSize: "0.8rem",
-                  marginLeft: "0.5rem",
-                }}
-              >
-                Updating...
-              </span>
-            )}
-          </div>
-
           {user && (
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              style={{
-                background: "transparent",
-                color: "#f44336",
-                border: "1px solid #f44336",
-                borderRadius: "6px",
-                padding: "0.6rem 1.25rem",
-                cursor: deleting ? "not-allowed" : "pointer",
-                fontSize: "0.9rem",
-                fontWeight: "600",
-                transition: "background 0.2s",
-                alignSelf: "flex-end",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.4rem",
-              }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.background = "rgba(244,67,54,0.1)")
-              }
-              onMouseOut={(e) =>
-                (e.currentTarget.style.background = "transparent")
-              }
-            >
-              <Trash2 size={15} />
-              {deleting ? "Deleting..." : "Delete Job"}
-            </button>
+            <>
+              <div style={{ flex: 1 }}>
+                <label
+                  style={{
+                    color: "var(--text-muted)",
+                    fontSize: "0.85rem",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.35rem",
+                    marginBottom: "0.4rem",
+                  }}
+                >
+                  <RefreshCw size={13} />
+                  Update Status
+                </label>
+                <select
+                  value={job.status}
+                  onChange={handleStatusChange}
+                  disabled={updating}
+                  style={{
+                    background: "var(--primary)",
+                    color: "var(--text-primary)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "6px",
+                    padding: "0.6rem 1rem",
+                    fontSize: "0.9rem",
+                    cursor: "pointer",
+                    minWidth: "180px",
+                  }}
+                >
+                  {STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+                {updating && (
+                  <span
+                    style={{
+                      color: "var(--text-muted)",
+                      fontSize: "0.8rem",
+                      marginLeft: "0.5rem",
+                    }}
+                  >
+                    Updating...
+                  </span>
+                )}
+              </div>
+
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                style={{
+                  background: "transparent",
+                  color: "#f44336",
+                  border: "1px solid #f44336",
+                  borderRadius: "6px",
+                  padding: "0.6rem 1.25rem",
+                  cursor: deleting ? "not-allowed" : "pointer",
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  transition: "background 0.2s",
+                  alignSelf: "flex-end",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.4rem",
+                }}
+                onMouseOver={(e) =>
+                  (e.currentTarget.style.background = "rgba(244,67,54,0.1)")
+                }
+                onMouseOut={(e) =>
+                  (e.currentTarget.style.background = "transparent")
+                }
+              >
+                <Trash2 size={15} />
+                {deleting ? "Deleting..." : "Delete Job"}
+              </button>
+            </>
+          )}
+
+          {/* Guest message */}
+          {!user && (
+            <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
+              <a
+                href="/auth/login"
+                style={{ color: "var(--accent)", textDecoration: "none" }}
+              >
+                Login
+              </a>{" "}
+              to update status or delete this job
+            </p>
           )}
         </div>
       </div>
