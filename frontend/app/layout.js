@@ -160,6 +160,7 @@ export default function RootLayout({ children }) {
           name="description"
           content="Connect homeowners with skilled tradespeople"
         />
+        <link rel="icon" href="/logo.png" />
       </head>
       <body className="app-bg">
         <AuthProvider>
