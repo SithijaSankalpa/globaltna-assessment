@@ -9,6 +9,7 @@ import {
   Trash2,
   ArrowLeft,
   RefreshCw,
+  Pencil,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../components/../context/AuthContext";
@@ -28,7 +29,8 @@ export default function JobDetailPage() {
   const [error, setError] = useState("");
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const { user } = useAuth();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const { user, token, isHomeowner, isTradesperson } = useAuth();
 
   useEffect(() => {
     if (!jobId) return;
@@ -48,7 +50,7 @@ export default function JobDetailPage() {
   const handleStatusChange = async (e) => {
     setUpdating(true);
     try {
-      const res = await updateJobStatus(job._id, e.target.value);
+      const res = await updateJobStatus(job._id, e.target.value, token);
       setJob(res.data);
       toast.success(`Status updated to "${res.data.status}"`);
     } catch (err) {
@@ -60,10 +62,9 @@ export default function JobDetailPage() {
   };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this job request?")) return;
     setDeleting(true);
     try {
-      await deleteJob(job._id);
+      await deleteJob(job._id, token);
       toast.success("Job request deleted");
       router.push("/");
     } catch (err) {
@@ -71,6 +72,15 @@ export default function JobDetailPage() {
       toast.error(err.message);
       setDeleting(false);
     }
+  };
+
+  const handleDeleteRequest = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteCancel = () => {
+    if (deleting) return;
+    setShowDeleteConfirm(false);
   };
 
   if (loading)
@@ -112,10 +122,9 @@ export default function JobDetailPage() {
 
       {/* Main Card */}
       <div
+        className="card card-elevated"
         style={{
-          background: "var(--secondary)",
-          border: "1px solid var(--border)",
-          borderRadius: "12px",
+          borderRadius: "16px",
           padding: "2rem",
           marginTop: "1.5rem",
         }}
@@ -239,9 +248,8 @@ export default function JobDetailPage() {
         {/* Contact */}
         {(job.contactName || job.contactEmail) && (
           <div
+            className="soft-panel"
             style={{
-              background: "var(--primary)",
-              border: "1px solid var(--border)",
               borderRadius: "8px",
               padding: "1rem 1.25rem",
               marginBottom: "1.5rem",
@@ -297,6 +305,7 @@ export default function JobDetailPage() {
         />
 
         {/* Actions */}
+        {/* Actions */}
         <div
           style={{
             display: "flex",
@@ -305,80 +314,92 @@ export default function JobDetailPage() {
             flexWrap: "wrap",
           }}
         >
-          {user && (
-            <>
-              <div style={{ flex: 1 }}>
-                <label
+          {/* Tradesperson — change status */}
+          {isTradesperson && (
+            <div style={{ flex: 1 }}>
+              <label
+                style={{
+                  color: "var(--text-muted)",
+                  fontSize: "0.85rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.35rem",
+                  marginBottom: "0.4rem",
+                }}
+              >
+                <RefreshCw size={13} /> Update Status
+              </label>
+              <select
+                value={job.status}
+                onChange={handleStatusChange}
+                disabled={updating}
+                style={{
+                  background: "var(--primary)",
+                  color: "var(--text-primary)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "10px",
+                  padding: "0.6rem 1rem",
+                  fontSize: "0.9rem",
+                  cursor: "pointer",
+                  minWidth: "180px",
+                }}
+              >
+                {STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+              {updating && (
+                <span
                   style={{
                     color: "var(--text-muted)",
-                    fontSize: "0.85rem",
+                    fontSize: "0.8rem",
+                    marginLeft: "0.5rem",
+                  }}
+                >
+                  Updating...
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Homeowner — edit + delete own job */}
+          {isHomeowner && user?.id === job.createdBy?._id && (
+            <>
+              {/* Show edit only if Open and not touched by tradesperson */}
+              {job.status === "Open" && !job.statusUpdatedBy && (
+                <a
+                  href={`/jobs/${job._id}/edit`}
+                  className="btn-ghost"
+                  style={{
+                    color: "var(--text-primary)",
+                    padding: "0.6rem 1.25rem",
+                    fontSize: "0.9rem",
+                    fontWeight: "600",
+                    textDecoration: "none",
                     display: "flex",
                     alignItems: "center",
-                    gap: "0.35rem",
-                    marginBottom: "0.4rem",
+                    gap: "0.4rem",
                   }}
                 >
-                  <RefreshCw size={13} />
-                  Update Status
-                </label>
-                <select
-                  value={job.status}
-                  onChange={handleStatusChange}
-                  disabled={updating}
-                  style={{
-                    background: "var(--primary)",
-                    color: "var(--text-primary)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "6px",
-                    padding: "0.6rem 1rem",
-                    fontSize: "0.9rem",
-                    cursor: "pointer",
-                    minWidth: "180px",
-                  }}
-                >
-                  {STATUSES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-                {updating && (
-                  <span
-                    style={{
-                      color: "var(--text-muted)",
-                      fontSize: "0.8rem",
-                      marginLeft: "0.5rem",
-                    }}
-                  >
-                    Updating...
-                  </span>
-                )}
-              </div>
+                  <Pencil size={15} /> Edit Job
+                </a>
+              )}
 
               <button
-                onClick={handleDelete}
+                onClick={handleDeleteRequest}
                 disabled={deleting}
+                className="btn-danger"
                 style={{
-                  background: "transparent",
-                  color: "#f44336",
-                  border: "1px solid #f44336",
-                  borderRadius: "6px",
                   padding: "0.6rem 1.25rem",
                   cursor: deleting ? "not-allowed" : "pointer",
                   fontSize: "0.9rem",
                   fontWeight: "600",
-                  transition: "background 0.2s",
-                  alignSelf: "flex-end",
                   display: "flex",
                   alignItems: "center",
                   gap: "0.4rem",
                 }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.background = "rgba(244,67,54,0.1)")
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
               >
                 <Trash2 size={15} />
                 {deleting ? "Deleting..." : "Delete Job"}
@@ -386,7 +407,7 @@ export default function JobDetailPage() {
             </>
           )}
 
-          {/* Guest message */}
+          {/* Guest */}
           {!user && (
             <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
               <a
@@ -395,11 +416,83 @@ export default function JobDetailPage() {
               >
                 Login
               </a>{" "}
-              to update status or delete this job
+              to manage this job
             </p>
           )}
         </div>
       </div>
+
+      {showDeleteConfirm && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background:
+              "linear-gradient(135deg, rgba(248, 249, 250, 0.75), rgba(220, 252, 231, 0.45))",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "1.5rem",
+            zIndex: 120,
+            backdropFilter: "blur(6px)",
+          }}
+        >
+          <div
+            className="card card-elevated"
+            style={{
+              width: "100%",
+              maxWidth: "420px",
+              padding: "1.5rem",
+              borderRadius: "16px",
+              border: "1px solid rgba(22, 163, 74, 0.15)",
+              boxShadow: "0 20px 40px rgba(15, 23, 42, 0.12)",
+            }}
+          >
+            <h3
+              style={{
+                fontSize: "1.15rem",
+                fontWeight: "600",
+                color: "var(--text-primary)",
+                marginBottom: "0.5rem",
+              }}
+            >
+              Confirm job deletion
+            </h3>
+            <p style={{ color: "var(--text-muted)", marginBottom: "1.25rem" }}>
+              You are about to permanently remove “{job.title}”. This cannot be
+              undone.
+            </p>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "0.75rem",
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleDeleteCancel}
+                className="btn-ghost"
+                style={{ padding: "0.55rem 1rem" }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="btn-danger"
+                style={{
+                  padding: "0.55rem 1rem",
+                  opacity: deleting ? 0.7 : 1,
+                }}
+              >
+                {deleting ? "Deleting..." : "Yes, delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

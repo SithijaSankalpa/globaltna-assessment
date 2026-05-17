@@ -1,88 +1,103 @@
 "use client";
+
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { getJobById, updateJob } from "../../../../lib/api";
+import { useAuth } from "../../../../context/AuthContext";
+import toast from "react-hot-toast";
 import {
+  ArrowLeft,
+  Save,
   FileText,
   AlignLeft,
   Tag,
   MapPin,
   User,
   Mail,
-  Send,
-  ArrowLeft,
 } from "lucide-react";
-import toast from "react-hot-toast";
-import { useAuth } from "../../../context/AuthContext";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { createJob } from "../../../lib/api";
 
 const CATEGORIES = ["Plumbing", "Electrical", "Painting", "Joinery", "Other"];
 
-export default function NewJobPage() {
+export default function EditJobPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [apiError, setApiError] = useState("");
-  const { user, token, loading: authLoading, isHomeowner } = useAuth();
+  const params = useParams();
+  const jobId = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  const { user, token, isHomeowner } = useAuth();
 
   const [form, setForm] = useState({
     title: "",
     description: "",
-    category: "Plumbing",
+    category: "",
     location: "",
     contactName: "",
     contactEmail: "",
   });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState("");
 
   useEffect(() => {
-    if (!authLoading && (!user || !isHomeowner)) {
-      toast.error("Only homeowners can post jobs");
-      router.push("/");
-    }
-  }, [user, authLoading, isHomeowner]);
+    const fetchJob = async () => {
+      try {
+        if (!jobId) {
+          throw new Error("Job ID is missing");
+        }
+
+        const res = await getJobById(jobId);
+        const job = res.data;
+
+        // Only owner can edit
+        if (!user || job.createdBy._id !== user.id || !isHomeowner) {
+          toast.error("Not authorized to edit this job");
+          router.push(`/jobs/${jobId}`);
+          return;
+        }
+
+        // Cannot edit if tradesperson has acted on it
+        if (job.statusUpdatedBy) {
+          toast.error(
+            "Cannot edit — a tradesperson has already updated this job",
+          );
+          router.push(`/jobs/${jobId}`);
+          return;
+        }
+
+        // Cannot edit if not Open
+        if (job.status !== "Open") {
+          toast.error("Only Open jobs can be edited");
+          router.push(`/jobs/${jobId}`);
+          return;
+        }
+
+        setForm({
+          title: job.title || "",
+          description: job.description || "",
+          category: job.category || "Plumbing",
+          location: job.location || "",
+          contactName: job.contactName || "",
+          contactEmail: job.contactEmail || "",
+        });
+      } catch (err) {
+        toast.error(err.message);
+        router.push("/");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user !== null && jobId) fetchJob();
+  }, [jobId, user]);
 
   const validate = () => {
     const e = {};
-    const alphaSpace = /^[A-Za-z\s]+$/;
-    const alphaSpaceMultiline = /^[A-Za-z\s\n]+$/;
-    const title = form.title.trim();
-    const description = form.description.trim();
-    const location = form.location.trim();
-    const contactName = form.contactName.trim();
-
-    if (!title) e.title = "Title is required";
-    if (title && title.length > 100)
-      e.title = "Title cannot exceed 100 characters";
-    if (title && !alphaSpace.test(title)) {
-      e.title = "Title can only contain letters and spaces";
-    }
-
-    if (!description) e.description = "Description is required";
-    if (description && description.length > 1000) {
-      e.description = "Description cannot exceed 1000 characters";
-    }
-    if (description && !alphaSpaceMultiline.test(description)) {
-      e.description = "Description can only contain letters and spaces";
-    }
-
-    if (form.category && !CATEGORIES.includes(form.category)) {
-      e.category = "Invalid category";
-    }
-
-    if (location && !alphaSpace.test(location)) {
-      e.location = "Location can only contain letters and spaces";
-    }
-
-    if (contactName && !alphaSpace.test(contactName)) {
-      e.contactName = "Contact name can only contain letters and spaces";
-    }
-
+    if (!form.title.trim()) e.title = "Title is required";
+    if (!form.description.trim()) e.description = "Description is required";
     if (
       form.contactEmail &&
       !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(form.contactEmail)
-    ) {
-      e.contactEmail = "Please provide a valid email address";
-    }
-
+    )
+      e.contactEmail = "Please enter a valid email";
     return e;
   };
 
@@ -94,7 +109,6 @@ export default function NewJobPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
-
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       toast.dismiss();
@@ -102,19 +116,19 @@ export default function NewJobPage() {
       return;
     }
 
-    setLoading(true);
+    setSaving(true);
     setApiError("");
 
     try {
-      await createJob(form, token);
-      toast.success("Job request posted successfully!");
-      router.push("/");
+      await updateJob(jobId, form, token);
+      toast.success("Job updated successfully!");
+      router.push(`/jobs/${jobId}`);
     } catch (err) {
       setApiError(err.message);
       toast.dismiss();
       toast.error(err.message);
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
@@ -127,29 +141,35 @@ export default function NewJobPage() {
     padding: "0.75rem 1rem",
     fontSize: "0.95rem",
     outline: "none",
-    transition: "border-color 0.2s",
   });
 
   const labelStyle = {
-    display: "block",
+    display: "flex",
+    alignItems: "center",
+    gap: "0.3rem",
     marginBottom: "0.4rem",
     color: "var(--text-muted)",
     fontSize: "0.875rem",
-    fontWeight: "600",
   };
 
-  const fieldStyle = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.25rem",
-  };
+  if (loading)
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          padding: "4rem",
+          color: "var(--text-muted)",
+        }}
+      >
+        Loading...
+      </div>
+    );
 
   return (
     <div style={{ maxWidth: "680px", margin: "0 auto" }}>
-      {/* Header */}
       <div style={{ marginBottom: "2rem" }}>
         <a
-          href="/"
+          href={`/jobs/${jobId}`}
           style={{
             color: "var(--accent)",
             textDecoration: "none",
@@ -159,7 +179,7 @@ export default function NewJobPage() {
             gap: "0.3rem",
           }}
         >
-          <ArrowLeft size={15} /> Back to listings
+          <ArrowLeft size={15} /> Back to job
         </a>
         <h1
           style={{
@@ -169,14 +189,14 @@ export default function NewJobPage() {
             color: "var(--text-primary)",
           }}
         >
-          Post a Service Request
+          Edit Job Request
         </h1>
         <p style={{ color: "var(--text-muted)", marginTop: "0.4rem" }}>
-          Describe what you need and tradespeople will find you
+          You can only edit this job while it is Open and untouched by a
+          tradesperson
         </p>
       </div>
 
-      {/* API Error */}
       {apiError && (
         <div
           style={{
@@ -192,7 +212,6 @@ export default function NewJobPage() {
         </div>
       )}
 
-      {/* Form */}
       <form
         onSubmit={handleSubmit}
         className="card card-elevated"
@@ -205,13 +224,9 @@ export default function NewJobPage() {
         }}
       >
         {/* Title */}
-        <div style={fieldStyle}>
+        <div style={{ display: "flex", flexDirection: "column" }}>
           <label style={labelStyle}>
-            <FileText
-              size={13}
-              style={{ display: "inline", marginRight: "0.3rem" }}
-            />
-            Title *
+            <FileText size={13} /> Title *
           </label>
           <input
             name="title"
@@ -221,20 +236,22 @@ export default function NewJobPage() {
             style={inputStyle("title")}
           />
           {errors.title && (
-            <span style={{ color: "#f44336", fontSize: "0.8rem" }}>
+            <span
+              style={{
+                color: "#f44336",
+                fontSize: "0.8rem",
+                marginTop: "0.25rem",
+              }}
+            >
               {errors.title}
             </span>
           )}
         </div>
 
         {/* Description */}
-        <div style={fieldStyle}>
+        <div style={{ display: "flex", flexDirection: "column" }}>
           <label style={labelStyle}>
-            <AlignLeft
-              size={13}
-              style={{ display: "inline", marginRight: "0.3rem" }}
-            />
-            Description *
+            <AlignLeft size={13} /> Description *
           </label>
           <textarea
             name="description"
@@ -249,7 +266,13 @@ export default function NewJobPage() {
             }}
           />
           {errors.description && (
-            <span style={{ color: "#f44336", fontSize: "0.8rem" }}>
+            <span
+              style={{
+                color: "#f44336",
+                fontSize: "0.8rem",
+                marginTop: "0.25rem",
+              }}
+            >
               {errors.description}
             </span>
           )}
@@ -263,13 +286,9 @@ export default function NewJobPage() {
             gap: "1rem",
           }}
         >
-          <div style={fieldStyle}>
+          <div style={{ display: "flex", flexDirection: "column" }}>
             <label style={labelStyle}>
-              <Tag
-                size={13}
-                style={{ display: "inline", marginRight: "0.3rem" }}
-              />
-              Category
+              <Tag size={13} /> Category
             </label>
             <select
               name="category"
@@ -283,19 +302,10 @@ export default function NewJobPage() {
                 </option>
               ))}
             </select>
-            {errors.category && (
-              <span style={{ color: "#f44336", fontSize: "0.8rem" }}>
-                {errors.category}
-              </span>
-            )}
           </div>
-          <div style={fieldStyle}>
+          <div style={{ display: "flex", flexDirection: "column" }}>
             <label style={labelStyle}>
-              <MapPin
-                size={13}
-                style={{ display: "inline", marginRight: "0.3rem" }}
-              />
-              Location
+              <MapPin size={13} /> Location
             </label>
             <input
               name="location"
@@ -304,11 +314,6 @@ export default function NewJobPage() {
               placeholder="e.g. Glasgow"
               style={inputStyle("location")}
             />
-            {errors.location && (
-              <span style={{ color: "#f44336", fontSize: "0.8rem" }}>
-                {errors.location}
-              </span>
-            )}
           </div>
         </div>
 
@@ -320,13 +325,9 @@ export default function NewJobPage() {
             gap: "1rem",
           }}
         >
-          <div style={fieldStyle}>
+          <div style={{ display: "flex", flexDirection: "column" }}>
             <label style={labelStyle}>
-              <User
-                size={13}
-                style={{ display: "inline", marginRight: "0.3rem" }}
-              />
-              Contact Name
+              <User size={13} /> Contact Name
             </label>
             <input
               name="contactName"
@@ -335,19 +336,10 @@ export default function NewJobPage() {
               placeholder="Your name"
               style={inputStyle("contactName")}
             />
-            {errors.contactName && (
-              <span style={{ color: "#f44336", fontSize: "0.8rem" }}>
-                {errors.contactName}
-              </span>
-            )}
           </div>
-          <div style={fieldStyle}>
+          <div style={{ display: "flex", flexDirection: "column" }}>
             <label style={labelStyle}>
-              <Mail
-                size={13}
-                style={{ display: "inline", marginRight: "0.3rem" }}
-              />
-              Contact Email
+              <Mail size={13} /> Contact Email
             </label>
             <input
               name="contactEmail"
@@ -358,7 +350,13 @@ export default function NewJobPage() {
               style={inputStyle("contactEmail")}
             />
             {errors.contactEmail && (
-              <span style={{ color: "#f44336", fontSize: "0.8rem" }}>
+              <span
+                style={{
+                  color: "#f44336",
+                  fontSize: "0.8rem",
+                  marginTop: "0.25rem",
+                }}
+              >
                 {errors.contactEmail}
               </span>
             )}
@@ -368,24 +366,24 @@ export default function NewJobPage() {
         {/* Submit */}
         <button
           type="submit"
-          disabled={loading}
+          disabled={saving}
           className="btn-primary"
           style={{
             borderRadius: "8px",
             padding: "0.875rem",
             fontSize: "1rem",
             fontWeight: "600",
-            cursor: loading ? "not-allowed" : "pointer",
+            cursor: saving ? "not-allowed" : "pointer",
             marginTop: "0.5rem",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             gap: "0.5rem",
-            opacity: loading ? 0.7 : 1,
+            opacity: saving ? 0.7 : 1,
           }}
         >
-          <Send size={16} />
-          {loading ? "Posting..." : "Post Service Request"}
+          <Save size={16} />
+          {saving ? "Saving..." : "Save Changes"}
         </button>
       </form>
     </div>

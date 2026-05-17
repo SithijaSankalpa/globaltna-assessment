@@ -1,10 +1,11 @@
 "use client";
 
-import toast from "react-hot-toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { registerUser } from "../../../lib/api";
 import { useAuth } from "../../../context/AuthContext";
+import toast from "react-hot-toast";
+import { Home, Wrench } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
+    role: "",
   });
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState("");
@@ -31,6 +33,7 @@ export default function RegisterPage() {
       e.password = "Password must be at least 6 characters";
     if (form.password !== form.confirmPassword)
       e.confirmPassword = "Passwords do not match";
+    if (!form.role) e.role = "Please select a role";
     return e;
   };
 
@@ -42,7 +45,6 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
-
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       toast.dismiss();
@@ -58,9 +60,10 @@ export default function RegisterPage() {
         name: form.name,
         email: form.email,
         password: form.password,
+        role: form.role,
       });
       login(res.user, res.token);
-      toast.success(`Account created! Welcome, ${res.user.name}!`);
+      toast.success(`Welcome, ${res.user.name}!`);
       router.push("/");
     } catch (err) {
       setApiError(err.message);
@@ -75,11 +78,12 @@ export default function RegisterPage() {
     width: "100%",
     background: "var(--primary)",
     color: "var(--text-primary)",
-    border: `1px solid ${errors[field] ? "#f44336" : "var(--border)"}`,
-    borderRadius: "6px",
+    border: `1px solid ${errors[field] ? "#fca5a5" : "var(--border)"}`,
+    borderRadius: "10px",
     padding: "0.75rem 1rem",
     fontSize: "0.95rem",
     outline: "none",
+    transition: "border-color 0.2s",
   });
 
   return (
@@ -95,16 +99,16 @@ export default function RegisterPage() {
           Create an Account
         </h1>
         <p style={{ color: "var(--text-muted)", marginTop: "0.5rem" }}>
-          Join FixMate to post service requests
+          Join FixMate to get started
         </p>
       </div>
 
       {apiError && (
         <div
           style={{
-            background: "#2a1a1a",
-            border: "1px solid #f44336",
-            color: "#f44336",
+            background: "#fee2e2",
+            border: "1px solid #fca5a5",
+            color: "#991b1b",
             padding: "1rem",
             borderRadius: "8px",
             marginBottom: "1.5rem",
@@ -116,22 +120,125 @@ export default function RegisterPage() {
 
       <form
         onSubmit={handleSubmit}
+        className="card card-elevated"
         style={{
-          background: "var(--secondary)",
-          border: "1px solid var(--border)",
-          borderRadius: "12px",
+          borderRadius: "16px",
           padding: "2rem",
           display: "flex",
           flexDirection: "column",
           gap: "1.25rem",
         }}
       >
+        {/* Role Selector */}
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+        >
+          <label
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "0.875rem",
+              fontWeight: "600",
+            }}
+          >
+            I am a *
+          </label>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "0.75rem",
+            }}
+          >
+            {[
+              {
+                value: "homeowner",
+                label: "Homeowner",
+                icon: Home,
+                desc: "I need work done",
+              },
+              {
+                value: "tradesperson",
+                label: "Tradesperson",
+                icon: Wrench,
+                desc: "I provide services",
+              },
+            ].map(({ value, label, icon: Icon, desc }) => (
+              <div
+                key={value}
+                onClick={() => {
+                  setForm((p) => ({ ...p, role: value }));
+                  setErrors((p) => ({ ...p, role: "" }));
+                }}
+                style={{
+                  border: `2px solid ${form.role === value ? "var(--accent)" : "var(--border)"}`,
+                  background:
+                    form.role === value
+                      ? "var(--accent-light)"
+                      : "var(--primary)",
+                  borderRadius: "12px",
+                  padding: "1rem",
+                  cursor: "pointer",
+                  textAlign: "center",
+                  transition: "all 0.2s",
+                  boxShadow:
+                    form.role === value
+                      ? "0 10px 20px rgba(22,163,74,0.18)"
+                      : "none",
+                }}
+              >
+                <Icon
+                  size={24}
+                  style={{
+                    color:
+                      form.role === value
+                        ? "var(--accent)"
+                        : "var(--text-muted)",
+                    margin: "0 auto 0.4rem",
+                  }}
+                />
+                <p
+                  style={{
+                    color:
+                      form.role === value
+                        ? "var(--accent)"
+                        : "var(--text-primary)",
+                    fontWeight: "600",
+                    fontSize: "0.9rem",
+                  }}
+                >
+                  {label}
+                </p>
+                <p
+                  style={{
+                    color: "var(--text-muted)",
+                    fontSize: "0.78rem",
+                    marginTop: "0.2rem",
+                  }}
+                >
+                  {desc}
+                </p>
+              </div>
+            ))}
+          </div>
+          {errors.role && (
+            <span style={{ color: "#f44336", fontSize: "0.8rem" }}>
+              {errors.role}
+            </span>
+          )}
+        </div>
+
         {/* Name */}
         <div
           style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
         >
-          <label style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
-            Full Name
+          <label
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "0.875rem",
+              fontWeight: "600",
+            }}
+          >
+            Full Name *
           </label>
           <input
             name="name"
@@ -151,8 +258,14 @@ export default function RegisterPage() {
         <div
           style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
         >
-          <label style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
-            Email
+          <label
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "0.875rem",
+              fontWeight: "600",
+            }}
+          >
+            Email *
           </label>
           <input
             name="email"
@@ -173,8 +286,14 @@ export default function RegisterPage() {
         <div
           style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
         >
-          <label style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
-            Password
+          <label
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "0.875rem",
+              fontWeight: "600",
+            }}
+          >
+            Password *
           </label>
           <input
             name="password"
@@ -195,8 +314,14 @@ export default function RegisterPage() {
         <div
           style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
         >
-          <label style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
-            Confirm Password
+          <label
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "0.875rem",
+              fontWeight: "600",
+            }}
+          >
+            Confirm Password *
           </label>
           <input
             name="confirmPassword"
@@ -217,22 +342,20 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading}
+          className="btn-primary"
           style={{
-            background: loading ? "#555" : "var(--accent)",
-            color: "white",
-            border: "none",
             borderRadius: "8px",
             padding: "0.875rem",
             fontSize: "1rem",
             fontWeight: "600",
             cursor: loading ? "not-allowed" : "pointer",
             marginTop: "0.5rem",
+            opacity: loading ? 0.7 : 1,
           }}
         >
           {loading ? "Creating account..." : "Create Account"}
         </button>
 
-        {/* Login Link */}
         <p
           style={{
             textAlign: "center",

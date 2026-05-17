@@ -59,13 +59,14 @@ export default function HomePage() {
   };
 
   const selectStyle = {
-    background: "var(--secondary)",
+    background: "var(--primary)",
     color: "var(--text-primary)",
     border: "1px solid var(--border)",
-    borderRadius: "6px",
+    borderRadius: "8px",
     padding: "0.5rem 1rem",
     fontSize: "0.9rem",
     cursor: "pointer",
+    outline: "none",
   };
 
   return (
@@ -75,39 +76,96 @@ export default function HomePage() {
           position: "sticky",
           top: "72px",
           zIndex: 50,
-          background: "var(--primary)",
-          paddingBottom: "1.25rem",
+          background: "rgba(248, 249, 250, 0.92)",
+          paddingBottom: "1.5rem",
           marginBottom: "1.5rem",
+          borderBottom: "1px solid var(--border)",
+          boxShadow: "var(--shadow-sm)",
+          backdropFilter: "blur(10px)",
+          borderRadius: "18px 18px 12px 12px",
+          overflow: "hidden",
         }}
       >
         {/* Header */}
-        <div style={{ marginBottom: "1rem" }}>
-          <h1
+        <div
+          className="soft-panel card-glow"
+          style={{
+            padding: "1.1rem 1.5rem",
+            marginBottom: "0.75rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "1rem",
+            flexWrap: "wrap",
+          }}
+        >
+          <div>
+            <p
+              style={{
+                color: "var(--accent)",
+                fontSize: "0.85rem",
+                fontWeight: "600",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+              }}
+            >
+              FixMate Board
+            </p>
+            <h1
+              style={{
+                fontSize: "2rem",
+                fontWeight: "bold",
+                color: "var(--text-primary)",
+              }}
+            >
+              Service Requests
+            </h1>
+            <p style={{ color: "var(--text-muted)" }}>
+              Browse open jobs or post your own service request
+            </p>
+          </div>
+          <div
             style={{
-              fontSize: "2rem",
-              fontWeight: "bold",
-              color: "var(--text-primary)",
-              marginBottom: "0.5rem",
+              display: "flex",
+              gap: "0.75rem",
+              flexWrap: "wrap",
             }}
           >
-            Service Requests
-          </h1>
-          <p style={{ color: "var(--text-muted)" }}>
-            Browse open jobs or post your own service request
-          </p>
+            {["Verified trades", "Fast responses", "Local experts"].map(
+              (pill) => (
+                <span
+                  key={pill}
+                  style={{
+                    background: "var(--accent-light)",
+                    color: "var(--accent)",
+                    border: "1px solid rgba(22,163,74,0.2)",
+                    padding: "0.35rem 0.7rem",
+                    borderRadius: "999px",
+                    fontSize: "0.78rem",
+                    fontWeight: "600",
+                  }}
+                >
+                  {pill}
+                </span>
+              ),
+            )}
+          </div>
         </div>
 
         {/* Filters */}
         <div
+          className="soft-panel"
           style={{
-            background: "var(--secondary)",
-            border: "1px solid var(--border)",
-            borderRadius: "10px",
-            padding: "1.25rem",
+            padding: "0.9rem 1rem",
+            marginBottom: "1rem",
             display: "flex",
             gap: "1rem",
             flexWrap: "wrap",
             alignItems: "center",
+            boxShadow: "var(--shadow-md)",
+            backdropFilter: "blur(6px)",
+            overflowX: "auto",
+            WebkitOverflowScrolling: "touch",
           }}
         >
           {/* Search */}
@@ -133,21 +191,14 @@ export default function HomePage() {
             />
             <button
               type="submit"
+              className="btn-primary"
               style={{
-                background: "var(--accent)",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                padding: "0.5rem 1rem",
-                cursor: "pointer",
-                fontWeight: "600",
                 display: "flex",
                 alignItems: "center",
                 gap: "0.4rem",
               }}
             >
-              <Search size={15} />
-              Search
+              <Search size={15} /> Search
             </button>
           </form>
 
@@ -183,7 +234,8 @@ export default function HomePage() {
           <p
             style={{
               color: "var(--text-muted)",
-              marginBottom: "1rem",
+
+              marginLeft: "0.4rem",
               fontSize: "0.9rem",
               display: "flex",
               alignItems: "center",
@@ -212,9 +264,9 @@ export default function HomePage() {
       {error && (
         <div
           style={{
-            background: "#2a1a1a",
-            border: "1px solid var(--danger)",
-            color: "#f44336",
+            background: "#fee2e2",
+            border: "1px solid #fca5a5",
+            color: "#991b1b",
             padding: "1rem",
             borderRadius: "8px",
             marginBottom: "1rem",
@@ -250,7 +302,7 @@ export default function HomePage() {
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-          gap: "1.25rem",
+          gap: "1.5rem",
         }}
       >
         {jobs.map((job) => (

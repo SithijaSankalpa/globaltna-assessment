@@ -125,17 +125,25 @@ exports.updateJob = async (req, res, next) => {
 // @route   PATCH /api/jobs/:id
 exports.updateJobStatus = async (req, res, next) => {
   try {
-    const job = await JobRequest.findById(req.params.id);
+    const job = await JobRequest.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          status: req.body.status,
+          statusUpdatedBy: req.user._id,
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
 
     if (!job) {
       return res
         .status(404)
         .json({ success: false, message: "Job request not found" });
     }
-
-    job.status = req.body.status;
-    job.statusUpdatedBy = req.user._id;
-    await job.save();
 
     res.status(200).json({
       success: true,

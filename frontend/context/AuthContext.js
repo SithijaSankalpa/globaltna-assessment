@@ -9,7 +9,6 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load from localStorage on mount
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
     const savedUser = localStorage.getItem("user");
@@ -34,8 +33,21 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("user");
   };
 
+  const isHomeowner = user?.role === "homeowner";
+  const isTradesperson = user?.role === "tradesperson";
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        login,
+        logout,
+        isHomeowner,
+        isTradesperson,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
