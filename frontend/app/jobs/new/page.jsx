@@ -106,10 +106,9 @@ export default function NewJobPage() {
     setApiError("");
 
     try {
-      await createJob(form);
+      await createJob(form, token);
       toast.success("Job request posted successfully!");
       router.push("/");
-      await createJob(form, token);
     } catch (err) {
       setApiError(err.message);
       toast.dismiss();
@@ -124,7 +123,7 @@ export default function NewJobPage() {
     background: "var(--primary)",
     color: "var(--text-primary)",
     border: `1px solid ${errors[field] ? "#f44336" : "var(--border)"}`,
-    borderRadius: "6px",
+    borderRadius: "10px",
     padding: "0.75rem 1rem",
     fontSize: "0.95rem",
     outline: "none",
@@ -136,7 +135,7 @@ export default function NewJobPage() {
     marginBottom: "0.4rem",
     color: "var(--text-muted)",
     fontSize: "0.875rem",
-    fontWeight: "500",
+    fontWeight: "600",
   };
 
   const fieldStyle = {
@@ -181,9 +180,9 @@ export default function NewJobPage() {
       {apiError && (
         <div
           style={{
-            background: "#2a1a1a",
-            border: "1px solid #f44336",
-            color: "#f44336",
+            background: "#fee2e2",
+            border: "1px solid #fca5a5",
+            color: "#991b1b",
             padding: "1rem",
             borderRadius: "8px",
             marginBottom: "1.5rem",
@@ -196,10 +195,9 @@ export default function NewJobPage() {
       {/* Form */}
       <form
         onSubmit={handleSubmit}
+        className="card card-elevated"
         style={{
-          background: "var(--secondary)",
-          border: "1px solid var(--border)",
-          borderRadius: "12px",
+          borderRadius: "16px",
           padding: "2rem",
           display: "flex",
           flexDirection: "column",
@@ -371,10 +369,8 @@ export default function NewJobPage() {
         <button
           type="submit"
           disabled={loading}
+          className="btn-primary"
           style={{
-            background: loading ? "#555" : "var(--accent)",
-            color: "white",
-            border: "none",
             borderRadius: "8px",
             padding: "0.875rem",
             fontSize: "1rem",
@@ -385,6 +381,7 @@ export default function NewJobPage() {
             alignItems: "center",
             justifyContent: "center",
             gap: "0.5rem",
+            opacity: loading ? 0.7 : 1,
           }}
         >
           <Send size={16} />

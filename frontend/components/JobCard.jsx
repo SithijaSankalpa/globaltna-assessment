@@ -6,26 +6,29 @@ export default function JobCard({ job }) {
     <a href={`/jobs/${job._id}`} style={{ textDecoration: "none" }}>
       <div
         style={{
-          background: "var(--card-bg)",
+          background: "linear-gradient(180deg, #ffffff 0%, #f3f8f4 100%)",
           border: "1px solid var(--border)",
-          borderRadius: "10px",
+          borderRadius: "16px",
           padding: "1.5rem",
           cursor: "pointer",
-          transition: "transform 0.2s, border-color 0.2s, box-shadow 0.2s",
+          transition: "transform 0.2s, box-shadow 0.2s, border-color 0.2s",
           display: "flex",
           flexDirection: "column",
           gap: "0.75rem",
           height: "100%",
+          boxShadow: "var(--shadow-md)",
+          position: "relative",
+          overflow: "hidden",
         }}
         onMouseOver={(e) => {
           e.currentTarget.style.transform = "translateY(-3px)";
+          e.currentTarget.style.boxShadow = "var(--shadow-lg)";
           e.currentTarget.style.borderColor = "var(--accent)";
-          e.currentTarget.style.boxShadow = "0 8px 25px rgba(233,69,96,0.15)";
         }}
         onMouseOut={(e) => {
           e.currentTarget.style.transform = "translateY(0)";
+          e.currentTarget.style.boxShadow = "var(--shadow-md)";
           e.currentTarget.style.borderColor = "var(--border)";
-          e.currentTarget.style.boxShadow = "none";
         }}
       >
         {/* Top Row */}
@@ -40,9 +43,10 @@ export default function JobCard({ job }) {
           <h3
             style={{
               color: "var(--text-primary)",
-              fontSize: "1.05rem",
+              fontSize: "1rem",
               fontWeight: "600",
-              lineHeight: 1.3,
+              lineHeight: 1.4,
+              fontFamily: "DM Sans, sans-serif",
             }}
           >
             {job.title}
@@ -70,21 +74,20 @@ export default function JobCard({ job }) {
         <div
           style={{
             display: "flex",
-            gap: "1rem",
+            gap: "0.75rem",
             flexWrap: "wrap",
             alignItems: "center",
-            marginTop: "0.25rem",
           }}
         >
           {job.category && (
             <span
               style={{
-                background: "var(--surface)",
+                background: "var(--accent-light)",
                 color: "var(--accent)",
                 padding: "0.2rem 0.6rem",
-                borderRadius: "4px",
-                fontSize: "0.8rem",
-                fontWeight: "500",
+                borderRadius: "6px",
+                fontSize: "0.78rem",
+                fontWeight: "600",
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "0.3rem",
@@ -112,8 +115,8 @@ export default function JobCard({ job }) {
 
           <span
             style={{
-              color: "var(--text-muted)",
-              fontSize: "0.82rem",
+              color: "var(--text-subtle)",
+              fontSize: "0.8rem",
               marginLeft: "auto",
               display: "inline-flex",
               alignItems: "center",

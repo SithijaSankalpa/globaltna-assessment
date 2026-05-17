@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { getJobById, updateJob } from "../../../../lib/api";
 import { useAuth } from "../../../../context/AuthContext";
 import toast from "react-hot-toast";
@@ -18,8 +18,10 @@ import {
 
 const CATEGORIES = ["Plumbing", "Electrical", "Painting", "Joinery", "Other"];
 
-export default function EditJobPage({ params }) {
+export default function EditJobPage() {
   const router = useRouter();
+  const params = useParams();
+  const jobId = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const { user, token, isHomeowner } = useAuth();
 
   const [form, setForm] = useState({
@@ -38,13 +40,17 @@ export default function EditJobPage({ params }) {
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const res = await getJobById(params.id);
+        if (!jobId) {
+          throw new Error("Job ID is missing");
+        }
+
+        const res = await getJobById(jobId);
         const job = res.data;
 
         // Only owner can edit
         if (!user || job.createdBy._id !== user.id || !isHomeowner) {
           toast.error("Not authorized to edit this job");
-          router.push(`/jobs/${params.id}`);
+          router.push(`/jobs/${jobId}`);
           return;
         }
 
@@ -53,14 +59,14 @@ export default function EditJobPage({ params }) {
           toast.error(
             "Cannot edit — a tradesperson has already updated this job",
           );
-          router.push(`/jobs/${params.id}`);
+          router.push(`/jobs/${jobId}`);
           return;
         }
 
         // Cannot edit if not Open
         if (job.status !== "Open") {
           toast.error("Only Open jobs can be edited");
-          router.push(`/jobs/${params.id}`);
+          router.push(`/jobs/${jobId}`);
           return;
         }
 
@@ -80,8 +86,8 @@ export default function EditJobPage({ params }) {
       }
     };
 
-    if (user !== null) fetchJob();
-  }, [params.id, user]);
+    if (user !== null && jobId) fetchJob();
+  }, [jobId, user]);
 
   const validate = () => {
     const e = {};
@@ -114,9 +120,9 @@ export default function EditJobPage({ params }) {
     setApiError("");
 
     try {
-      await updateJob(params.id, form, token);
+      await updateJob(jobId, form, token);
       toast.success("Job updated successfully!");
-      router.push(`/jobs/${params.id}`);
+      router.push(`/jobs/${jobId}`);
     } catch (err) {
       setApiError(err.message);
       toast.dismiss();
@@ -131,7 +137,7 @@ export default function EditJobPage({ params }) {
     background: "var(--primary)",
     color: "var(--text-primary)",
     border: `1px solid ${errors[field] ? "#f44336" : "var(--border)"}`,
-    borderRadius: "6px",
+    borderRadius: "10px",
     padding: "0.75rem 1rem",
     fontSize: "0.95rem",
     outline: "none",
@@ -163,7 +169,7 @@ export default function EditJobPage({ params }) {
     <div style={{ maxWidth: "680px", margin: "0 auto" }}>
       <div style={{ marginBottom: "2rem" }}>
         <a
-          href={`/jobs/${params.id}`}
+          href={`/jobs/${jobId}`}
           style={{
             color: "var(--accent)",
             textDecoration: "none",
@@ -194,9 +200,9 @@ export default function EditJobPage({ params }) {
       {apiError && (
         <div
           style={{
-            background: "#2a1a1a",
-            border: "1px solid #f44336",
-            color: "#f44336",
+            background: "#fee2e2",
+            border: "1px solid #fca5a5",
+            color: "#991b1b",
             padding: "1rem",
             borderRadius: "8px",
             marginBottom: "1.5rem",
@@ -208,10 +214,9 @@ export default function EditJobPage({ params }) {
 
       <form
         onSubmit={handleSubmit}
+        className="card card-elevated"
         style={{
-          background: "var(--secondary)",
-          border: "1px solid var(--border)",
-          borderRadius: "12px",
+          borderRadius: "16px",
           padding: "2rem",
           display: "flex",
           flexDirection: "column",
@@ -362,10 +367,8 @@ export default function EditJobPage({ params }) {
         <button
           type="submit"
           disabled={saving}
+          className="btn-primary"
           style={{
-            background: saving ? "#555" : "var(--accent)",
-            color: "white",
-            border: "none",
             borderRadius: "8px",
             padding: "0.875rem",
             fontSize: "1rem",
@@ -376,6 +379,7 @@ export default function EditJobPage({ params }) {
             alignItems: "center",
             justifyContent: "center",
             gap: "0.5rem",
+            opacity: saving ? 0.7 : 1,
           }}
         >
           <Save size={16} />

@@ -78,11 +78,12 @@ export default function RegisterPage() {
     width: "100%",
     background: "var(--primary)",
     color: "var(--text-primary)",
-    border: `1px solid ${errors[field] ? "#f44336" : "var(--border)"}`,
-    borderRadius: "6px",
+    border: `1px solid ${errors[field] ? "#fca5a5" : "var(--border)"}`,
+    borderRadius: "10px",
     padding: "0.75rem 1rem",
     fontSize: "0.95rem",
     outline: "none",
+    transition: "border-color 0.2s",
   });
 
   return (
@@ -98,16 +99,16 @@ export default function RegisterPage() {
           Create an Account
         </h1>
         <p style={{ color: "var(--text-muted)", marginTop: "0.5rem" }}>
-          Join GlobalTNA to get started
+          Join FixMate to get started
         </p>
       </div>
 
       {apiError && (
         <div
           style={{
-            background: "#2a1a1a",
-            border: "1px solid #f44336",
-            color: "#f44336",
+            background: "#fee2e2",
+            border: "1px solid #fca5a5",
+            color: "#991b1b",
             padding: "1rem",
             borderRadius: "8px",
             marginBottom: "1.5rem",
@@ -119,10 +120,9 @@ export default function RegisterPage() {
 
       <form
         onSubmit={handleSubmit}
+        className="card card-elevated"
         style={{
-          background: "var(--secondary)",
-          border: "1px solid var(--border)",
-          borderRadius: "12px",
+          borderRadius: "16px",
           padding: "2rem",
           display: "flex",
           flexDirection: "column",
@@ -133,7 +133,13 @@ export default function RegisterPage() {
         <div
           style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
         >
-          <label style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
+          <label
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "0.875rem",
+              fontWeight: "600",
+            }}
+          >
             I am a *
           </label>
           <div
@@ -167,13 +173,17 @@ export default function RegisterPage() {
                   border: `2px solid ${form.role === value ? "var(--accent)" : "var(--border)"}`,
                   background:
                     form.role === value
-                      ? "rgba(233,69,96,0.1)"
+                      ? "var(--accent-light)"
                       : "var(--primary)",
-                  borderRadius: "8px",
+                  borderRadius: "12px",
                   padding: "1rem",
                   cursor: "pointer",
                   textAlign: "center",
                   transition: "all 0.2s",
+                  boxShadow:
+                    form.role === value
+                      ? "0 10px 20px rgba(22,163,74,0.18)"
+                      : "none",
                 }}
               >
                 <Icon
@@ -221,7 +231,13 @@ export default function RegisterPage() {
         <div
           style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
         >
-          <label style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
+          <label
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "0.875rem",
+              fontWeight: "600",
+            }}
+          >
             Full Name *
           </label>
           <input
@@ -242,7 +258,13 @@ export default function RegisterPage() {
         <div
           style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
         >
-          <label style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
+          <label
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "0.875rem",
+              fontWeight: "600",
+            }}
+          >
             Email *
           </label>
           <input
@@ -264,7 +286,13 @@ export default function RegisterPage() {
         <div
           style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
         >
-          <label style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
+          <label
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "0.875rem",
+              fontWeight: "600",
+            }}
+          >
             Password *
           </label>
           <input
@@ -286,7 +314,13 @@ export default function RegisterPage() {
         <div
           style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
         >
-          <label style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
+          <label
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "0.875rem",
+              fontWeight: "600",
+            }}
+          >
             Confirm Password *
           </label>
           <input
@@ -308,16 +342,15 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading}
+          className="btn-primary"
           style={{
-            background: loading ? "#555" : "var(--accent)",
-            color: "white",
-            border: "none",
             borderRadius: "8px",
             padding: "0.875rem",
             fontSize: "1rem",
             fontWeight: "600",
             cursor: loading ? "not-allowed" : "pointer",
             marginTop: "0.5rem",
+            opacity: loading ? 0.7 : 1,
           }}
         >
           {loading ? "Creating account..." : "Create Account"}

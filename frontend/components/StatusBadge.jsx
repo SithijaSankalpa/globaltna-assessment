@@ -1,18 +1,18 @@
 import { CircleDot, Clock, CheckCircle } from "lucide-react";
 
 const statusConfig = {
-  Open: { icon: CircleDot, bg: "#1a3a1a", color: "#4caf50", border: "#4caf50" },
+  Open: { icon: CircleDot, bg: "#dcfce7", color: "#15803d", border: "#86efac" },
   "In Progress": {
     icon: Clock,
-    bg: "#3a2a00",
-    color: "#ff9800",
-    border: "#ff9800",
+    bg: "#fef9c3",
+    color: "#854d0e",
+    border: "#fde047",
   },
   Closed: {
     icon: CheckCircle,
-    bg: "#2a1a1a",
-    color: "#f44336",
-    border: "#f44336",
+    bg: "#fee2e2",
+    color: "#991b1b",
+    border: "#fca5a5",
   },
 };
 
@@ -30,12 +30,12 @@ export default function StatusBadge({ status }) {
         borderRadius: "20px",
         fontSize: "0.78rem",
         fontWeight: "600",
-        letterSpacing: "0.05em",
+        letterSpacing: "0.03em",
         textTransform: "uppercase",
-        whiteSpace: "nowrap",
         display: "inline-flex",
         alignItems: "center",
         gap: "0.35rem",
+        whiteSpace: "nowrap",
       }}
     >
       <Icon size={12} strokeWidth={2.5} />
