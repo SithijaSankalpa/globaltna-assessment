@@ -1,5 +1,7 @@
 const JobRequest = require("../models/JobRequest");
 
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 // @desc    Get all jobs
 // @route   GET /api/jobs
 exports.getAllJobs = async (req, res, next) => {
@@ -9,7 +11,13 @@ exports.getAllJobs = async (req, res, next) => {
 
     if (category) filter.category = category;
     if (status) filter.status = status;
-    if (search) filter.$text = { $search: search };
+    if (search && search.trim()) {
+      const safeSearch = escapeRegex(search.trim());
+      filter.$or = [
+        { title: { $regex: safeSearch, $options: "i" } },
+        { description: { $regex: safeSearch, $options: "i" } },
+      ];
+    }
 
     const jobs = await JobRequest.find(filter)
       .populate("createdBy", "name role")
