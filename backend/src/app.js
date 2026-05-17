@@ -14,9 +14,15 @@ const app = express();
 app.use(
   cors({
     origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
       const allowedOrigins = [process.env.CLIENT_URL, "http://localhost:3000"];
 
-      if (!origin || allowedOrigins.includes(origin)) {
+      const isVercelPreview =
+        origin.includes("globaltna-assessment") &&
+        origin.includes("vercel.app");
+
+      if (allowedOrigins.includes(origin) || isVercelPreview) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
