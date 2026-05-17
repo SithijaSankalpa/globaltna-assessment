@@ -10,7 +10,7 @@ Built as a technical assessment for the Full-Stack Developer Intern role at Glob
 
 | Service     | URL                                            |
 | ----------- | ---------------------------------------------- |
-| Frontend    | https://your-frontend.vercel.app               |
+| Frontend    | https://globaltna-assessment-virid.vercel.app/ |
 | Backend API | https://globaltna-assessment-t9sk.onrender.com |
 
 > Replace the above URLs after deployment.
