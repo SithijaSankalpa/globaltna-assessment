@@ -44,14 +44,19 @@ export default function NewJobPage() {
     const e = {};
     const alphaSpace = /^[A-Za-z\s]+$/;
     const alphaSpaceMultiline = /^[A-Za-z\s\n]+$/;
+    const hasNumber = /\d/;
     const title = form.title.trim();
     const description = form.description.trim();
     const location = form.location.trim();
     const contactName = form.contactName.trim();
+    const contactEmail = form.contactEmail.trim();
 
     if (!title) e.title = "Title is required";
     if (title && title.length > 100)
       e.title = "Title cannot exceed 100 characters";
+    if (title && hasNumber.test(title)) {
+      e.title = "Title cannot contain numbers";
+    }
     if (title && !alphaSpace.test(title)) {
       e.title = "Title can only contain letters and spaces";
     }
@@ -60,25 +65,38 @@ export default function NewJobPage() {
     if (description && description.length > 1000) {
       e.description = "Description cannot exceed 1000 characters";
     }
+    if (description && hasNumber.test(description)) {
+      e.description = "Description cannot contain numbers";
+    }
     if (description && !alphaSpaceMultiline.test(description)) {
       e.description = "Description can only contain letters and spaces";
     }
 
+    if (!form.category) e.category = "Category is required";
     if (form.category && !CATEGORIES.includes(form.category)) {
       e.category = "Invalid category";
     }
 
+    if (!location) e.location = "Location is required";
+    if (location && hasNumber.test(location)) {
+      e.location = "Location cannot contain numbers";
+    }
     if (location && !alphaSpace.test(location)) {
       e.location = "Location can only contain letters and spaces";
     }
 
+    if (!contactName) e.contactName = "Contact name is required";
+    if (contactName && hasNumber.test(contactName)) {
+      e.contactName = "Contact name cannot contain numbers";
+    }
     if (contactName && !alphaSpace.test(contactName)) {
       e.contactName = "Contact name can only contain letters and spaces";
     }
 
+    if (!contactEmail) e.contactEmail = "Contact email is required";
     if (
-      form.contactEmail &&
-      !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(form.contactEmail)
+      contactEmail &&
+      !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(contactEmail)
     ) {
       e.contactEmail = "Please provide a valid email address";
     }
